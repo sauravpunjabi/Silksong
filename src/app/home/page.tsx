@@ -3,16 +3,8 @@ import { Button } from "@heroui/button";
 import Image from "next/image";
 import buttonUI from "@/app/public/button_redesign.png";
 import { useEffect, useState } from "react";
-import { button } from "@heroui/theme";
-import { supabase } from "../lib/supabase";
-import { useUser } from "../context/userContext";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Calendar } from "@heroui/calendar";
+import { createClient } from "../lib/supabase/server";
 
 type foodItems = {
   name: string;
@@ -20,22 +12,31 @@ type foodItems = {
   calories: number;
 };
 
-export default function HomePage() {
-  const { email } = useUser();
+type Item = {
+  id: number;
+  name: string;
+};
+
+type HomePageClient = {
+  ingredients: Item[];
+  cuisines: Item[];
+  allergens: Item[];
+};
+
+export default function HomePage({
+  ingredients,
+  cuisines,
+  allergens,
+}: HomePageClient) {
   const [page, setPage] = useState("home");
   const [veggie, setVeggie] = useState<string>("");
-  const [disName, setDisName] = useState<string>(email?.toString() || "");
   const [labels, setLabels] = useState<{ id: number; name: string }[]>([]);
   const [allergy, setAllergy] = useState<string>("");
   const [allergen, setAllergen] = useState<{ id: number; name: string }[]>([]);
   const [foodItems, setFoodItems] = useState<foodItems[]>([]);
-  const [cuisine, setCuisine] = useState<string>("");
+  const [cuisine, setCuisine] = useState<{ id: number; name: string }[]>([]);
   const [mealType, setMealType] = useState<string>("");
   const [visibleIndexes, setVisibleIndexes] = useState<number[]>([]);
-
-  const logout = async () => {
-    await supabase.auth.signOut();
-  };
 
   useEffect(() => {
     const fetchItems = async () => {
@@ -69,90 +70,13 @@ export default function HomePage() {
         console.log("Error: ", error);
       } else {
         console.log(data);
-        setAllergen(data);
+        setCuisine(data);
       }
     };
     fetchCuisine();
   }, []);
 
   // When you press on Next button
-  const fetchIngredients = async (
-    ingredients: string[],
-    allergies: string[]
-  ) => {
-    const res = await fetch("/api/generate", {
-      method: "POST",
-      headers: { "Content-type": "application/json" },
-      body: JSON.stringify({
-        ingredients: ingredients,
-        allergies: allergies,
-        cuisine: cuisine,
-        mealType: mealType,
-      }),
-    });
-    const food = await res.json();
-    console.log(food);
-    setFoodItems(food.items);
-  };
-
-  const saveIngredients = async () => {
-    console.log("called");
-    if (!veggie.trim()) return;
-    const { data, error } = await supabase
-      .from("fridge")
-      .insert([{ name: veggie.trim() }])
-      .select();
-
-    if (error) {
-      console.log("Error:", error);
-    } else if (data && data.length > 0) {
-      setLabels((prev) => [...prev, data[0]]);
-      setVeggie("");
-      console.log("Data successfully added!");
-    }
-  };
-
-  const deleteIngredients = async (index: number) => {
-    const { data, error } = await supabase
-      .from("fridge")
-      .delete()
-      .eq("id", index);
-    if (error) {
-      console.log("Deletion Error:", error);
-    } else {
-      console.log("Deletion success!", data);
-    }
-    setLabels((prev) => prev.filter((item) => item.id !== index));
-  };
-
-  const saveAllergies = async () => {
-    if (!allergy.trim()) return;
-    const { data, error } = await supabase
-      .from("allergy")
-      .insert([{ name: allergy.trim() }])
-      .select();
-
-    if (error) {
-      console.log("Error: ", error);
-    } else if (data && data.length > 0) {
-      console.log(data);
-      setAllergen((prev) => [...prev, data[0]]);
-      setAllergy("");
-    }
-  };
-
-  const deleteAllergy = async (index: number) => {
-    const { data, error } = await supabase
-      .from("allergy")
-      .delete()
-      .eq("id", index);
-    if (error) {
-      console.log("Error: ", error);
-    } else {
-      console.log("Allergy deleted!", data);
-      setAllergen((prev) => prev.filter((allergy) => allergy.id !== index));
-    }
-  };
 
   // const saveCuisine = async() => {
   //   if(!cuisine.trim()) return;
@@ -185,9 +109,7 @@ export default function HomePage() {
               setPage("profile");
             }}
           ></div>
-          <h2 className="p-1 pl-2 pr-2 bg-amber-800 rounded-lg mb-2">
-            {disName}
-          </h2>
+
           <div
             className="flex justify-center items-center h-32 w-full rounded-xl bg-amber-700 hover:bg-amber-800"
             onClick={() => {
@@ -237,16 +159,6 @@ export default function HomePage() {
             <div className="flex flex-col items-center w-5/6 h-screen justify-center">
               <div className="w-28 h-28 rounded-full bg-amber-700"></div>
               <div className="flex flex-col items-center w-1/2">
-                <div className="mb-7">
-                  <input
-                    value={disName}
-                    onChange={(e) => {
-                      handleData(setDisName, e);
-                    }}
-                    placeholder="Update username"
-                    className="border-1 border-amber-900 text-lg rounded-md p-1"
-                  />
-                </div>
                 <div className="pb-7">
                   <input
                     value={allergy}
@@ -260,15 +172,7 @@ export default function HomePage() {
                   />
                 </div>
                 <div className="flex pr-4">
-                  <div>
-                    <Select>
-                      <SelectTrigger className="w-[180px]"></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="gain">Gain</SelectItem>
-                        <SelectItem value="lose">Lose</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  <div>Weight gain and lose</div>
                   <div className="pb-7">
                     <input
                       type="number"
@@ -300,7 +204,6 @@ export default function HomePage() {
                   ))}
                 </div>
 
-                <h2>{email}</h2>
                 <Button
                   onPress={() => {
                     logout;
@@ -341,7 +244,11 @@ export default function HomePage() {
             </div>
           </div>
         )}
-        {page === "planner" && <h2>Planner</h2>}
+        {page === "planner" && (
+          <>
+            <Calendar aria-label="Date (No Selection)" />
+          </>
+        )}
         {page === "surprise" && <h2>Surprise me</h2>}
         {page === "fridge" && (
           <>
@@ -396,7 +303,7 @@ export default function HomePage() {
 
                 <Button
                   onPress={() => {
-                    fetchIngredients(
+                    fetchRecipes(
                       labels.map((label) => label.name),
                       allergen.map((allergen) => allergen.name)
                     );
@@ -421,37 +328,13 @@ export default function HomePage() {
                   <div className="text-2xl">
                     <h2>What meal are you having?</h2>
                   </div>
-                  <div>
-                    <Select onValueChange={setMealType} value={mealType}>
-                      <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Meal" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="breakfast">Breakfast</SelectItem>
-                        <SelectItem value="lunch">Lunch</SelectItem>
-                        <SelectItem value="dinner">Dinner</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  <div>breakfast, lunch, dinner?</div>
                 </div>
                 <div className="pt-8">
                   <div className="text-2xl ">
                     <h2>What are you craving?</h2>
                   </div>
-                  <div>
-                    <Select onValueChange={setCuisine} value={cuisine}>
-                      <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Cuisine" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="indian">Indian</SelectItem>
-                        <SelectItem value="chinese">Chinese</SelectItem>
-                        <SelectItem value="italian">Italian</SelectItem>
-                        <SelectItem value="korean">Korean</SelectItem>
-                        <SelectItem value="european">European</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  <div>Cuisine??</div>
                 </div>
               </div>
             </div>
