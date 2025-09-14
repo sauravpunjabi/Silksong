@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { createClient } from "../lib/supabase/server";
 
 export async function logout() {
@@ -7,55 +8,33 @@ export async function logout() {
   await supabase.auth.signOut();
 }
 
-export async function fetchItems() {
-  const supabase = await createClient();
-  const { data, error } = await supabase.from("fridge").select("*");
+// export async function fetchItems() {
+//   const supabase = await createClient();
+//   const { data, error } = await supabase.from("fridge").select("*");
 
-  if (!error && data) {
-    const items = data.map((item) => item.name);
-    console.log("Fridge data: ", items);
-    setLabels(data);
-  }
+//   if (!error && data) {
+//     const items = data.map((item) => item.name);
+//     console.log("Fridge data: ", items);
+//     // setLabels(data);
+//   }
+//   if (error) {
+//     console.log("Error in showing fridge data: ", error);
+//   }
+// }
+
+export async function saveIngredients(veggie: { name: string }[]) {
+  const supabase = await createClient();
+  console.log("save Ingredients called");
+  if (!veggie || veggie.length === 0) return;
+  const { error } = await supabase.from("fridge").insert(veggie);
   if (error) {
-    console.log("Error in showing fridge data: ", error);
+    console.log("Error saving ingredients to fridge: ", error);
   }
+  revalidatePath("/home");
 }
 
-const fetchRecipes = async (ingredients: string[], allergies: string[]) => {
-  const res = await fetch("/api/generate", {
-    method: "POST",
-    headers: { "Content-type": "application/json" },
-    body: JSON.stringify({
-      ingredients: ingredients,
-      allergies: allergies,
-      cuisine: cuisine,
-      mealType: mealType,
-    }),
-  });
-  const food = await res.json();
-  console.log(food);
-  setFoodItems(food.items);
-};
-
-export default async function saveIngredients(veggie: string) {
+export async function deleteIngredient(index: number) {
   const supabase = await createClient();
-  console.log("called");
-  if (!veggie.trim()) return;
-  const { data, error } = await supabase
-    .from("fridge")
-    .insert([{ name: veggie.trim() }])
-    .select();
-
-  if (error) {
-    console.log("Error:", error);
-  } else if (data && data.length > 0) {
-    setLabels((prev) => [...prev, data[0]]);
-    setVeggie("");
-    console.log("Data successfully added!");
-  }
-}
-
-const deleteIngredients = async (index: number) => {
   const { data, error } = await supabase
     .from("fridge")
     .delete()
@@ -65,11 +44,14 @@ const deleteIngredients = async (index: number) => {
   } else {
     console.log("Deletion success!", data);
   }
-  setLabels((prev) => prev.filter((item) => item.id !== index));
-};
+  //   setLabels((prev) => prev.filter((item) => item.id !== index));
 
-const saveAllergies = async () => {
+  revalidatePath("/home");
+}
+
+export async function saveAllergies(allergy: string) {
   if (!allergy.trim()) return;
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from("allergy")
     .insert([{ name: allergy.trim() }])
@@ -79,12 +61,15 @@ const saveAllergies = async () => {
     console.log("Error: ", error);
   } else if (data && data.length > 0) {
     console.log(data);
-    setAllergen((prev) => [...prev, data[0]]);
-    setAllergy("");
+    // setAllergen((prev) => [...prev, data[0]]);
+    // setAllergy("");
   }
-};
 
-const deleteAllergy = async (index: number) => {
+  revalidatePath("/home");
+}
+
+export async function deleteAllergy(index: number) {
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from("allergy")
     .delete()
@@ -93,6 +78,8 @@ const deleteAllergy = async (index: number) => {
     console.log("Error: ", error);
   } else {
     console.log("Allergy deleted!", data);
-    setAllergen((prev) => prev.filter((allergy) => allergy.id !== index));
+    // setAllergen((prev) => prev.filter((allergy) => allergy.id !== index));
   }
-};
+
+  revalidatePath("/home");
+}
