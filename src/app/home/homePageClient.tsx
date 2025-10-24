@@ -39,6 +39,8 @@ export default function HomePageClient({
   const [veggie, setVeggie] = useState<string>("");
 
   const [allergy, setAllergies] = useState<string>("");
+  const [addedAllergy, setAddedAllergies] = useState<Item[]>([]);
+
   const [addedItem, setAddedItems] = useState<Item[]>([]);
   const [recipeItem, setRecipeItems] = useState<foodRecipe[]>([]);
   const [mealType, setMealTypes] = useState<string>("");
@@ -56,22 +58,6 @@ export default function HomePageClient({
     );
   };
 
-  const fetchRecipes = async (ingredients: string[], allergies: string[]) => {
-    const res = await fetch("/api/generate", {
-      method: "POST",
-      headers: { "Content-type": "application/json" },
-      body: JSON.stringify({
-        ingredients: ingredients,
-        allergies: allergies,
-        cuisine: cuisine,
-        mealType: mealType,
-      }),
-    });
-    const food = await res.json();
-    console.log(food);
-    setRecipeItems(food.items);
-  };
-
   const handleData = (
     setfunction: React.Dispatch<React.SetStateAction<string>>,
     e: React.ChangeEvent<HTMLInputElement>
@@ -79,9 +65,20 @@ export default function HomePageClient({
     setfunction(e.target.value);
   };
 
+  const handleAddedAllergies = async () => {
+    const trimmed = allergy.trim();
+    if (!trimmed) return;
+    setAddedAllergies((prev) => [...prev, { id: Date.now(), name: trimmed }]);
+    setAllergies("");
+  };
+
   const handleAddedItems = async () => {
     setAddedItems((prev) => [...prev, { id: Date.now(), name: veggie.trim() }]);
     setVeggie("");
+  };
+
+  const deleteItem = async (id: number) => {
+    setAddedItems((prev) => prev.filter((i) => i.id !== id));
   };
 
   const handleSaveIngredient = async () => {
@@ -89,6 +86,34 @@ export default function HomePageClient({
     saveIngredients(saveItems);
     setAddedItems([]);
   };
+
+  async function fetchRecipes(
+    labels: string[],
+    allergen: string[],
+    cuisine: string[],
+    mealType: string
+  ) {
+    try {
+      const res = await fetch("/api/generate", {
+        method: "POST",
+        headers: { "Content-type": "application/json" },
+        body: JSON.stringify({
+          ingredients: labels,
+          allergies: allergen,
+          cuisines: cuisine,
+          mealType: mealType,
+        }),
+      });
+      const food = await res.json();
+      setRecipeItems(food.items);
+
+      console.log(food);
+      console.log(recipeItem);
+      setPage("home");
+    } catch (error) {
+      console.log("Error: ", error);
+    }
+  }
 
   return (
     <>
@@ -149,6 +174,7 @@ export default function HomePageClient({
           <>
             <div className="flex flex-col items-center w-5/6 h-screen justify-center">
               <div className="w-28 h-28 rounded-full bg-amber-700"></div>
+              <h2>Name</h2>
               <div className="flex flex-col items-center w-1/2">
                 <div className="pb-7">
                   <input
@@ -157,12 +183,13 @@ export default function HomePageClient({
                       handleData(setAllergies, e);
                     }}
                     onKeyDown={(e) => {
-                      if (e.key === "Enter") saveAllergies(allergy);
+                      if (e.key === "Enter") handleAddedAllergies();
                     }}
                     placeholder="Add allergen info"
                   />
                 </div>
-                <div className="flex pr-4">
+
+                {/* <div className="flex pr-4">
                   <div>Weight gain and lose</div>
                   <div className="pb-7">
                     <input
@@ -177,7 +204,7 @@ export default function HomePageClient({
                       placeholder="kgs"
                     />
                   </div>
-                </div>
+                </div> */}
                 <div className="flex flex-row pb-7">
                   {allergen.map((allergy) => (
                     <div
@@ -194,6 +221,31 @@ export default function HomePageClient({
                     </div>
                   ))}
                 </div>
+                <Button
+                  onClick={() => {
+                    console.log(
+                      "allergies to be added in local: ",
+                      addedAllergy
+                    );
+                    handleAddedAllergies();
+                  }}
+                  className="bg-amber-900 text-amber-100 p-2 rounded-md"
+                >
+                  Save to local
+                </Button>
+                <Button
+                  onClick={() => {
+                    console.log(
+                      "Allergies to be added in database: ",
+                      addedAllergy
+                    );
+                    saveAllergies(addedAllergy);
+                    setAddedAllergies([]);
+                  }}
+                  className="bg-amber-900 text-amber-100 p-2 rounded-md"
+                >
+                  Save
+                </Button>
 
                 <Button
                   onClick={() => {
@@ -244,98 +296,117 @@ export default function HomePageClient({
         {page === "surprise" && <h2>Surprise me</h2>}
         {page === "fridge" && (
           <>
-            <div className="flex flex-row w-5/6">
-              <div className="flex flex-col p-4 pt-8 w-1/2">
+            <div className="flex flex-row w-5/6 p-4 ">
+              <div className="flex flex-col p-4 pt-8 mr-4 w-1/2 border-2 border-yellow-950 rounded-2xl">
                 <h2 className="text-3xl"> Add vegetables or fruits</h2>
                 <div className="flex">
-                  <h2>Already in fridge</h2>
-                  <div>
-                    {labels.map((label) => (
-                      <div
-                        className="flex flex-row text-lg text-white items-center"
-                        key={label.id}
-                      >
-                        {label.name}
-                        <h2
-                          onClick={() => {
-                            deleteIngredient(label.id);
-                          }}
-                          className="cursor-pointer text-red-200 text-xl pl-2"
+                  <div className="flex flex-col">
+                    <h2>Already in fridge</h2>
+                    <div>
+                      {labels.map((label) => (
+                        <div
+                          className="flex flex-row text-lg text-white items-center"
+                          key={label.id}
                         >
-                          X
+                          {label.name}
+                          <h2
+                            onClick={() => {
+                              deleteIngredient(label.id);
+                            }}
+                            className="cursor-pointer text-red-200 text-xl pl-2"
+                          >
+                            X
+                          </h2>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex flex-row">
+                      <Button
+                        className="w-32 h-10 bg-blue-600 text-yellow-700 flex justify-center items-center relative overflow-hidden hover:shadow-xl active:opacity-80"
+                        onClick={handleSaveIngredient}
+                      >
+                        <h2 className="pt-1 w-full h-full z-20 font-semibold text-2xl hover:text-shadow-xs">
+                          Add these to fridge!
                         </h2>
-                      </div>
-                    ))}
+                        <Image
+                          className="absolute top-0 left-0 w-full h-full object-cover z-10"
+                          src="/btn_curr.png"
+                          width={200}
+                          height={200}
+                          alt="Button Image"
+                        />
+                      </Button>
+                    </div>
                   </div>
-                  <div className="flex flex-row justify-between items-center pt-4 w-full">
-                    <input
-                      className="flex border border-amber-900 text-lg rounded-lg w-8/12 mr-10 p-1"
-                      value={veggie}
-                      onChange={(e) => {
-                        handleData(setVeggie, e);
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          handleSaveIngredient;
-                        }
-                      }}
-                    />
-                    <Button
-                      className="w-32 h-10 bg-blue-600 text-yellow-700 flex justify-center items-center relative overflow-hidden hover:shadow-xl active:opacity-80"
-                      onClick={handleAddedItems}
-                    >
-                      <h2 className="pt-1 w-full h-full z-20 font-semibold text-2xl hover:text-shadow-xs">
-                        Add
-                      </h2>
-                      <Image
-                        className="absolute top-0 left-0 w-full h-full object-cover z-10"
-                        src="/btn_curr.png"
-                        width={200}
-                        height={200}
-                        alt="Button Image"
+                  <div className="flex flex-col">
+                    <h2>Tray</h2>
+                    <div>
+                      {addedItem.map((item) => (
+                        <div
+                          className="flex flex-row text-lg text-white items-center"
+                          key={item.id}
+                        >
+                          {item.name}
+                          <h2
+                            onClick={() => {
+                              deleteItem(item.id);
+                            }}
+                            className="cursor-pointer text-red-200 text-xl pl-2"
+                          >
+                            X
+                          </h2>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex flex-row justify-between items-center pt-4 w-full">
+                      <input
+                        className="flex border border-amber-900 text-lg rounded-lg w-8/12 mr-10 p-1"
+                        value={veggie}
+                        onChange={(e) => {
+                          handleData(setVeggie, e);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            handleSaveIngredient;
+                          }
+                        }}
                       />
-                    </Button>
-                    <Button
-                      className="w-32 h-10 bg-blue-600 text-yellow-700 flex justify-center items-center relative overflow-hidden hover:shadow-xl active:opacity-80"
-                      onClick={handleSaveIngredient}
-                    >
-                      <h2 className="pt-1 w-full h-full z-20 font-semibold text-2xl hover:text-shadow-xs">
-                        Add these to fridge!
-                      </h2>
-                      <Image
-                        className="absolute top-0 left-0 w-full h-full object-cover z-10"
-                        src="/btn_curr.png"
-                        width={200}
-                        height={200}
-                        alt="Button Image"
-                      />
-                    </Button>
+                      <Button
+                        className="w-32 h-10 bg-blue-600 text-yellow-700 flex justify-center items-center relative overflow-hidden hover:shadow-xl active:opacity-80"
+                        onClick={handleAddedItems}
+                      >
+                        <h2 className="pt-1 w-full h-full z-20 font-semibold text-2xl hover:text-shadow-xs">
+                          Add
+                        </h2>
+                        <Image
+                          className="absolute top-0 left-0 w-full h-full object-cover z-10"
+                          src="/btn_curr.png"
+                          width={200}
+                          height={200}
+                          alt="Button Image"
+                        />
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          fetchRecipes(
+                            labels.map((label) => label.name),
+                            allergen.map((allergen) => allergen.name),
+                            cuisine.map((cuisine) => cuisine.name),
+                            mealType
+                          );
+                        }}
+                        className="w-32 h-10 flex justify-center items-center mt-10"
+                      >
+                        <h2 className="pt-1 w-full h-full z-20 font-semibold text-2xl hover:text-shadow-xs text-yellow-700">
+                          Next
+                        </h2>
+                      </Button>
+                    </div>
                   </div>
-
-                  {/* <Button
-                  onClick={() => {
-                    fetchRecipes(
-                      labels.map((label) => label.name),
-                      allergen.map((allergen) => allergen.name)
-                    );
-                  }}
-                  className="w-32 h-10 flex justify-center items-center active:opacity-80 mt-10"
-                >
-                  <h2 className="pt-1 w-full h-full z-20 font-semibold text-2xl hover:text-shadow-xs text-yellow-700">
-                    Next
-                  </h2>
-                  <Image
-                    className="absolute top-0 left-0 w-full h-full object-cover z-10"
-                    src="/button_redesign.png"
-                    width={200}
-                    height={200}
-                    alt="Button Image"
-                  />
-                </Button> */}
                 </div>
               </div>
 
-              <div className="flex flex-col pt-8">
+              <div className="flex flex-col p-8 border-2 w-1/2 border-yellow-900 rounded-2xl">
                 <div>
                   <div className="text-2xl">
                     <h2>What meal are you having?</h2>

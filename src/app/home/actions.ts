@@ -8,20 +8,6 @@ export async function logout() {
   await supabase.auth.signOut();
 }
 
-// export async function fetchItems() {
-//   const supabase = await createClient();
-//   const { data, error } = await supabase.from("fridge").select("*");
-
-//   if (!error && data) {
-//     const items = data.map((item) => item.name);
-//     console.log("Fridge data: ", items);
-//     // setLabels(data);
-//   }
-//   if (error) {
-//     console.log("Error in showing fridge data: ", error);
-//   }
-// }
-
 export async function saveIngredients(veggie: { name: string }[]) {
   const supabase = await createClient();
   console.log("save Ingredients called");
@@ -49,22 +35,18 @@ export async function deleteIngredient(index: number) {
   revalidatePath("/home");
 }
 
-export async function saveAllergies(allergy: string) {
-  if (!allergy.trim()) return;
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("allergy")
-    .insert([{ name: allergy.trim() }])
-    .select();
-
-  if (error) {
-    console.log("Error: ", error);
-  } else if (data && data.length > 0) {
-    console.log(data);
-    // setAllergen((prev) => [...prev, data[0]]);
-    // setAllergy("");
+export async function saveAllergies(allergy: { name: string }[]) {
+  if (!allergy || allergy.length === 0) {
+    console.log("No changes to the allergy box!");
+    return;
   }
-
+  const supabase = await createClient();
+  const allergyObj = allergy.map((itemname) => ({ name: itemname.name }));
+  console.log("Allergy object: ", allergyObj);
+  const { error } = await supabase.from("allergy").insert(allergyObj);
+  if (error) {
+    console.log("Error saving allergies: ", error);
+  }
   revalidatePath("/home");
 }
 
@@ -82,4 +64,11 @@ export async function deleteAllergy(index: number) {
   }
 
   revalidatePath("/home");
+}
+
+export async function getUserEmail() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 }
