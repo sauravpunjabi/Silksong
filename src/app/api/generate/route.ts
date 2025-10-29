@@ -7,7 +7,7 @@ export async function POST(req: NextRequest) {
   const { ingredients, allergies, cuisines, mealType } = (await req.json()) as {
     ingredients: string[];
     allergies: string[];
-    cuisines: string;
+    cuisines: string[];
     mealType: string;
   };
 
