@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
     ingredients: string[];
     allergies: string[];
     cuisines: string[];
-    mealType: string;
+    mealType: string[];
   };
 
   const prompt = `Generate 3 distinct food items.
