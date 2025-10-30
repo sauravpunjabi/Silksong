@@ -2,21 +2,19 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { deleteIngredient, saveIngredients } from "../main/actions"; // Adjust path if needed
+import { deleteIngredient, saveIngredients } from "../main/actions";
 import { useRouter } from "next/navigation";
 import { type Item } from "./page";
 import { Plus, Search } from "lucide-react";
 
-// --- Types ---
 type FridgeClientProps = {
   initialFridgeItems: Item[];
   initialAllergens: Item[];
-  initialCuisines: Item[]; // This prop is now unused, but kept for consistency
+  initialCuisines: Item[];
 };
 
 type DietPreference = "veg" | "non-veg" | null;
 
-// --- Constants ---
 const MEAL_TYPE_OPTIONS = ["Breakfast", "Lunch", "Dinner"];
 const CUISINE_OPTIONS = [
   "Indian",
@@ -30,26 +28,19 @@ const CUISINE_OPTIONS = [
 export default function FridgeClient({
   initialFridgeItems,
   initialAllergens,
-  initialCuisines, // Note: This prop is no longer used for the UI
+  initialCuisines,
 }: FridgeClientProps) {
   const router = useRouter();
-
-  // --- LOGIC & STATE ---
-
-  // Fridge/Tray State
   const [veggie, setVeggie] = useState<string>("");
   const [addedItem, setAddedItems] = useState<Item[]>([]);
   const [labels, setLabels] = useState<Item[]>(initialFridgeItems);
 
-  // Data from server (only allergens are used in the search params)
   const [allergen, setAllergen] = useState<Item[]>(initialAllergens);
 
-  // Search Filters State
   const [dietPreference, setDietPreference] = useState<DietPreference>(null);
   const [mealTypes, setMealTypes] = useState<string[]>([]);
   const [selectedCuisines, setSelectedCuisines] = useState<string[]>([]);
 
-  // --- Handlers for Fridge/Tray ---
   const handleAddedItems = async () => {
     const trimmed = veggie.trim();
     if (!trimmed) return;
@@ -77,8 +68,6 @@ export default function FridgeClient({
     await deleteIngredient(id);
     setLabels((prev) => prev.filter((item) => item.id !== id));
   };
-
-  // --- Handlers for Search Filters ---
   const handleDietToggle = () => {
     setDietPreference((prev) => {
       if (prev === null) return "veg";
@@ -86,8 +75,6 @@ export default function FridgeClient({
       return null;
     });
   };
-
-  // Generic handler for multi-select arrays
   const handleToggle = (
     item: string,
     list: string[],
@@ -100,7 +87,6 @@ export default function FridgeClient({
     }
   };
 
-  // --- Main Search Handler ---
   const handleFindRecipes = () => {
     const allIngredients = [
       ...labels.map((item) => item.name),
@@ -110,13 +96,11 @@ export default function FridgeClient({
 
     const params = new URLSearchParams();
 
-    // Add arrays to params
     allIngredients.forEach((item) => params.append("ingredients", item));
     allAllergens.forEach((item) => params.append("allergies", item));
     mealTypes.forEach((meal) => params.append("mealType", meal));
     selectedCuisines.forEach((cuisine) => params.append("cuisine", cuisine));
 
-    // Add single values
     if (dietPreference) {
       params.set("diet", dietPreference);
     }
@@ -124,18 +108,13 @@ export default function FridgeClient({
     router.push(`/home?${params.toString()}`);
   };
 
-  // --- END OF LOGIC ---
-
   return (
-    // Main container with a light green background
     <div className="flex flex-row w-full min-h-full p-8 gap-x-8 bg-green-50">
-      {/* --- Left Panel: Manage Ingredients --- */}
       <div className="flex flex-col p-6 w-1/2 bg-white shadow-lg rounded-2xl gap-y-4">
         <h2 className="text-2xl font-semibold text-gray-800 border-b pb-4">
           Manage Your Fridge
         </h2>
 
-        {/* Add New Item Input */}
         <div className="flex gap-x-2">
           <Input
             value={veggie}
@@ -148,13 +127,12 @@ export default function FridgeClient({
           />
           <Button
             onClick={handleAddedItems}
-            className="bg-amber-600 hover:bg-amber-700 text-white shrink-0" // Amber
+            className="bg-amber-600 hover:bg-amber-700 text-white shrink-0"
           >
             <Plus size={16} className="mr-1" /> Add
           </Button>
         </div>
 
-        {/* "Tray" for new items */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Tray (Items to add)
@@ -182,14 +160,13 @@ export default function FridgeClient({
             <Button
               onClick={handleSaveIngredient}
               variant="outline"
-              className="w-full mt-2 text-amber-800 border-amber-800 hover:bg-amber-50" // Amber
+              className="w-full mt-2 text-amber-800 border-amber-800 hover:bg-amber-50"
             >
               Add Tray to Fridge
             </Button>
           )}
         </div>
 
-        {/* "In Fridge" list */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Items in Fridge
@@ -201,7 +178,7 @@ export default function FridgeClient({
             {labels.map((label) => (
               <span
                 key={label.id}
-                className="flex items-center gap-x-2 px-3 py-1 bg-amber-500 text-white rounded-full text-sm font-medium" // Amber
+                className="flex items-center gap-x-2 px-3 py-1 bg-amber-500 text-white rounded-full text-sm font-medium"
               >
                 {label.name}
                 <button
@@ -216,13 +193,11 @@ export default function FridgeClient({
         </div>
       </div>
 
-      {/* --- Right Panel: Find Recipes (UPDATED) --- */}
       <div className="flex flex-col p-6 w-1/2 bg-white shadow-lg rounded-2xl gap-y-6">
         <h2 className="text-2xl font-semibold text-gray-800 border-b pb-4">
           Find a Recipe
         </h2>
 
-        {/* --- Diet Preference Toggle --- */}
         <div className="w-full">
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Diet Preference
@@ -256,7 +231,6 @@ export default function FridgeClient({
           </Button>
         </div>
 
-        {/* --- NEW: Meal Type Toggles --- */}
         <div className="w-full">
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Meal Type
@@ -279,7 +253,6 @@ export default function FridgeClient({
           </div>
         </div>
 
-        {/* --- NEW: Cuisine Toggles --- */}
         <div className="w-full">
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Cuisine
@@ -304,7 +277,6 @@ export default function FridgeClient({
           </div>
         </div>
 
-        {/* "Next" Button (Main Action) */}
         <Button
           onClick={handleFindRecipes}
           className="w-full bg-amber-600 text-white hover:bg-amber-700 p-6 text-lg font-bold mt-auto flex items-center gap-x-2" // Amber

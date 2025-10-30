@@ -1,11 +1,10 @@
-// app/home/profile/ProfileClient.tsx
 "use client";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input"; // Import shadcn Input
+import { Input } from "@/components/ui/input";
 import { deleteAllergy, saveAllergies, logout } from "../main/actions";
 import { type Item } from "./page";
-import { LogOut } from "lucide-react"; // Optional: for an icon
+import { LogOut } from "lucide-react";
 
 type ProfileClientProps = {
   initialAllergies: Item[];
@@ -40,19 +39,14 @@ export default function ProfileClient({
   };
 
   return (
-    // Main container with a soft, neutral background
     <div className="flex w-full h-full items-center justify-center p-8 bg-amber-50">
-      {/* Profile Card */}
       <div className="flex flex-col items-center w-full max-w-md p-8 bg-white shadow-lg rounded-2xl gap-y-6">
-        {/* Avatar Placeholder */}
         <div className="w-28 h-28 rounded-full bg-amber-600 flex items-center justify-center">
           <span className="text-4xl font-bold text-white">U</span>{" "}
-          {/* Placeholder */}
         </div>
 
         <h2 className="text-2xl font-semibold text-gray-800">Your Profile</h2>
 
-        {/* Add Allergy Section */}
         <div className="w-full">
           <label
             htmlFor="allergy-input"
@@ -80,18 +74,15 @@ export default function ProfileClient({
           </div>
         </div>
 
-        {/* Allergies List Section */}
         <div className="w-full">
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Your Allergies
           </label>
-          {/* This box will contain all the allergy tags */}
+
           <div className="flex flex-wrap gap-2 p-4 min-h-[80px] w-full bg-gray-50 border rounded-lg">
             {savedAllergies.length === 0 && addedAllergy.length === 0 && (
               <span className="text-gray-400">No allergies added yet.</span>
             )}
-
-            {/* Saved Allergies (from DB) - solid color */}
             {savedAllergies.map((item) => (
               <span
                 key={item.id}
@@ -102,12 +93,11 @@ export default function ProfileClient({
                   onClick={() => handleDeleteFromDb(item.id)}
                   className="text-amber-100 hover:text-white font-bold"
                 >
-                  &times;
+                  &times
                 </button>
               </span>
             ))}
 
-            {/* "Tray" of new allergies - lighter color */}
             {addedAllergy.map((item) => (
               <span
                 key={item.id}
@@ -129,19 +119,18 @@ export default function ProfileClient({
           </div>
         </div>
 
-        {/* Action Buttons */}
         <div className="flex flex-col w-full gap-y-3 mt-4">
           <Button
             onClick={handleSaveToDb}
             className="w-full bg-amber-900 text-amber-100 hover:bg-amber-800"
-            disabled={addedAllergy.length === 0} // Disable if nothing to save
+            disabled={addedAllergy.length === 0}
           >
             Save New Allergies
           </Button>
 
           <Button
             onClick={() => logout()}
-            variant="outline" // Use shadcn outline style
+            variant="outline"
             className="w-full text-red-600 border-red-600 hover:bg-red-50 hover:text-red-700 flex items-center gap-x-2"
           >
             <LogOut size={16} />

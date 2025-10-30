@@ -1,9 +1,7 @@
-// app/home/HomeClient.tsx
 "use client";
 import { useState } from "react";
-import { ChevronDown, ChevronRight } from "lucide-react"; // Icons for toggle
+import { ChevronDown, ChevronRight } from "lucide-react";
 
-// --- Type (Import from './page.tsx' or a central types file) ---
 type foodRecipe = {
   name: string;
   recipe: string[];
@@ -15,37 +13,29 @@ type HomeClientProps = {
 };
 
 export default function HomeClient({ recipes }: HomeClientProps) {
-  // --- CLIENT-SIDE LOGIC ---
   const [visibleIndexes, setVisibleIndexes] = useState<number[]>([]);
 
   const toggleVisibility = (index: number) => {
-    setVisibleIndexes(
-      (prev) =>
-        prev.includes(index)
-          ? prev.filter((i) => i !== index) // Remove index to collapse
-          : [...prev, index] // Add index to expand
+    setVisibleIndexes((prev) =>
+      prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]
     );
   };
-  // --- END LOGIC ---
 
   return (
-    // --- UI ---
     <div className="flex flex-col gap-y-4">
       {recipes.map((food, index) => {
         const isVisible = visibleIndexes.includes(index);
         return (
-          // Each recipe is a clean card
           <div
             key={index}
             className="bg-white shadow-lg rounded-2xl overflow-hidden transition-all duration-300"
           >
-            {/* Card Header (Clickable) */}
             <div
               className="flex items-center justify-between p-6 cursor-pointer hover:bg-gray-50"
               onClick={() => toggleVisibility(index)}
             >
               <h2 className="text-2xl font-bold text-amber-900">{food.name}</h2>
-              {/* Icon indicates the state (expanded or collapsed) */}
+
               {isVisible ? (
                 <ChevronDown className="text-amber-900" />
               ) : (
@@ -53,20 +43,18 @@ export default function HomeClient({ recipes }: HomeClientProps) {
               )}
             </div>
 
-            {/* Card Body (Conditionally Rendered) */}
             {isVisible && (
               <div className="p-6 border-t border-gray-200 animate-in fade-in-0 slide-in-from-top-2 duration-300">
                 <h3 className="text-lg font-semibold text-gray-700 mb-3">
                   Recipe Steps:
                 </h3>
-                {/* Ordered list for steps */}
+
                 <ol className="list-decimal list-inside flex flex-col gap-y-2 text-gray-600">
                   {food.recipe.map((step, stepIndex) => (
                     <li key={stepIndex}>{step}</li>
                   ))}
                 </ol>
 
-                {/* Calories Tag */}
                 <div className="mt-6">
                   <span className="px-3 py-1 bg-amber-200 text-amber-900 rounded-full text-sm font-medium">
                     {food.calories} Calories

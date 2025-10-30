@@ -1,17 +1,13 @@
-// app/page.tsx (or app/home/page.tsx)
 import HomeClient from "./homeClient";
 import Link from "next/link";
 import { AlertTriangle } from "lucide-react";
 
-// --- Types ---
 type foodRecipe = {
   name: string;
   recipe: string[];
   calories: number;
 };
-// --- End Types ---
 
-// --- Data Fetching (Updated) ---
 async function fetchRecipes(
   labels: string[],
   allergen: string[],
@@ -41,6 +37,7 @@ async function fetchRecipes(
     }
 
     const food = await res.json();
+    console.log(food);
     return food.items || [];
   } catch (error) {
     console.error("Error in fetchRecipes: ", error);
@@ -48,36 +45,29 @@ async function fetchRecipes(
   }
 }
 
-// --- Helper Function ---
-// This safely converts a search param (string or array) into an array
 const getParamAsArray = (param: string | string[] | undefined): string[] => {
   if (Array.isArray(param)) {
-    return param; // It's already an array
+    return param;
   }
   if (typeof param === "string") {
-    return [param]; // It's a single string, put it in an array
+    return [param];
   }
-  return []; // It's undefined, return an empty array
+  return [];
 };
 
-// --- Server Component (Updated) ---
 export default async function HomePage({
   searchParams,
 }: {
-  // This type is the standard for searchParams
   searchParams?: { [key: string]: string | string[] | undefined };
 }) {
   let recipes: foodRecipe[] = [];
 
-  // --- THIS IS THE CORRECTED LOGIC ---
   const ingredients = getParamAsArray(searchParams?.ingredients);
   const allergies = getParamAsArray(searchParams?.allergies);
-  const cuisines = getParamAsArray(searchParams?.cuisine); // Note: 'cuisine' (singular)
-  const mealTypes = getParamAsArray(searchParams?.mealType); // Note: 'mealType'
-  const diet = (searchParams?.diet as string) || ""; // Gets 'veg' or 'non-veg'
-  // --- END OF FIX ---
+  const cuisines = getParamAsArray(searchParams?.cuisine);
+  const mealTypes = getParamAsArray(searchParams?.mealType);
+  const diet = (searchParams?.diet as string) || "";
 
-  // Only fetch recipes if we have ingredients
   if (ingredients.length > 0) {
     recipes = await fetchRecipes(
       ingredients,
