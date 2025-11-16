@@ -1,0 +1,82 @@
+{
+  "node": {
+    "000792f35557cf3b15e6f761306d9fa9e1d1b5aeb6": {
+      "workers": {
+        "app/fridge/page": {
+          "moduleId": "[project]/.next-internal/server/app/fridge/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/lib/supabase/server.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE1 => \"[project]/src/app/main/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/fridge/page": "rsc"
+      }
+    },
+    "008e0cb5d3bc6392bb82c1b363896f34af2ebd7210": {
+      "workers": {
+        "app/fridge/page": {
+          "moduleId": "[project]/.next-internal/server/app/fridge/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/lib/supabase/server.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE1 => \"[project]/src/app/main/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/fridge/page": "action-browser"
+      }
+    },
+    "00a6feb59593c4fbafc9ec196203a2670841814654": {
+      "workers": {
+        "app/fridge/page": {
+          "moduleId": "[project]/.next-internal/server/app/fridge/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/lib/supabase/server.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE1 => \"[project]/src/app/main/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/fridge/page": "action-browser"
+      }
+    },
+    "403e6e76fe982155afdf7e3d7ad9616695571bfaa0": {
+      "workers": {
+        "app/fridge/page": {
+          "moduleId": "[project]/.next-internal/server/app/fridge/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/lib/supabase/server.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE1 => \"[project]/src/app/main/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/fridge/page": "action-browser"
+      }
+    },
+    "4085c6804a6f763c0a8b115481ef164d21d75534e6": {
+      "workers": {
+        "app/fridge/page": {
+          "moduleId": "[project]/.next-internal/server/app/fridge/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/lib/supabase/server.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE1 => \"[project]/src/app/main/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/fridge/page": "action-browser"
+      }
+    },
+    "408ca2acaaf379ee1b9014c2f5ce02823710f43f48": {
+      "workers": {
+        "app/fridge/page": {
+          "moduleId": "[project]/.next-internal/server/app/fridge/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/lib/supabase/server.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE1 => \"[project]/src/app/main/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/fridge/page": "action-browser"
+      }
+    },
+    "40cf1948d51fa6969277512ce39d5fe24358a208a8": {
+      "workers": {
+        "app/fridge/page": {
+          "moduleId": "[project]/.next-internal/server/app/fridge/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/lib/supabase/server.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE1 => \"[project]/src/app/main/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/fridge/page": "action-browser"
+      }
+    }
+  },
+  "edge": {}
+}
