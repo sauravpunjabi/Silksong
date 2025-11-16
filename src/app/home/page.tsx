@@ -1,6 +1,7 @@
 import HomeClient from "./homeClient";
 import Link from "next/link";
 import { AlertTriangle } from "lucide-react";
+import StatsCard from "@/components/StatsCard";  
 
 type foodRecipe = {
   name: string;
@@ -12,7 +13,7 @@ async function fetchRecipes(
   labels: string[],
   allergen: string[],
   cuisine: string[],
-  mealType: string[], // Changed to array
+  mealType: string[],
   diet: string
 ): Promise<foodRecipe[]> {
   try {
@@ -24,8 +25,8 @@ async function fetchRecipes(
       body: JSON.stringify({
         ingredients: labels,
         allergies: allergen,
-        cuisines: cuisine, // Note: your API needs to support an array
-        mealType: mealType, // Note: your API needs to support an array
+        cuisines: cuisine,
+        mealType: mealType,
         diet: diet,
       }),
       cache: "no-store",
@@ -37,7 +38,6 @@ async function fetchRecipes(
     }
 
     const food = await res.json();
-    console.log(food);
     return food.items || [];
   } catch (error) {
     console.error("Error in fetchRecipes: ", error);
@@ -81,6 +81,10 @@ export default async function HomePage({
   return (
     <div className="flex flex-col w-full min-h-full p-8 bg-green-50 gap-y-6">
       <h1 className="text-3xl font-bold text-gray-800">Your Recipes</h1>
+
+      
+      <StatsCard />
+
       {recipes.length === 0 ? (
         <div className="flex flex-col items-center justify-center p-10 bg-white rounded-2xl shadow-lg gap-y-4">
           <AlertTriangle size={48} className="text-amber-500" />
